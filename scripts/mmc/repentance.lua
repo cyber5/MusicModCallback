@@ -559,6 +559,10 @@ local function getMusicTrack()
 		return Music.MUSIC_DOGMA_BOSS
 	end
 	
+	--TODO: play Boss Over Twisted instead of Mom Fight music when fighting Mausoleum Mom when STATE_MAUSOLEUM_HEART_KILLED is true
+	--TODO: compare vanilla to MMC: check what happens if you rerun or use Forget Me Not and replay the Mineshaft Escape
+	--TODO: need to play Mineshaft Escape music in Crawlspace! Also, compare vanilla to MMC of Mineshaft Escape in Black Market
+	
 	if ascent then
 		return Music.MUSIC_REVERSE_GENESIS
 	elseif game:GetStateFlag(GameStateFlag.STATE_MAUSOLEUM_HEART_KILLED) and (stage == LevelStage.STAGE3_2 or (stage == LevelStage.STAGE3_1 and curseoflabyrinth)) and inrepstage and not (roomtype == RoomType.ROOM_BOSS and room:GetBossID() == 8) then
@@ -1367,6 +1371,7 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 					if satanfightstage == 0 and room:GetFrameCount() > 10 and not room:IsClear() then
 						local playertable = Isaac.FindByType(EntityType.ENTITY_PLAYER,0) --variant 0 is true players, i.e. not co-op babies
 						for i,entity in pairs(playertable) do
+							--TODO: check Soul of the Forgotten?
 							local tempPlayer = entity:ToPlayer()
 							if tempPlayer and tempPlayer.Position.Y < 540 then
 								musicCrossfade(Music.MUSIC_SATAN_BOSS)
@@ -1383,6 +1388,8 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 			if currentbosscount == 0 and previousbosscount > 0 then
 				if (level:GetStage() == LevelStage.STAGE3_2 or (level:GetStage() == LevelStage.STAGE3_1 and curseoflabyrinth)) and room:GetBossID() == 8 and level:GetStageType() >= StageType.STAGETYPE_REPENTANCE then
 					musicCrossfade(Music.MUSIC_NULL)
+				elseif (level:GetStage() == LevelStage.STAGE4_2 or (level:GetStage() == LevelStage.STAGE4_1 and curseoflabyrinth)) and room:GetBossID() == 88 and level:GetStageType() >= StageType.STAGETYPE_REPENTANCE then
+					musicCrossfade(Music.MUSIC_JINGLE_MOTHER_OVER, Music.MUSIC_BOSS_OVER)
 				else
 					musicCrossfade(getGenericBossDeathJingle(), Music.MUSIC_BOSS_OVER)
 				end
