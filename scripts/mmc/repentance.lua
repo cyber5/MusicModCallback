@@ -1384,6 +1384,16 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 					satanfightstage = 0
 				end
 			end
+
+			--check for ultra greed outside of greed mode
+		        if currentbosscount == 0 and room:GetBossID() == 62 and Game().Difficulty == 1 then
+			    local ultragreeds = Isaac.FindByType(406)
+			    if #ultragreeds > 0 then
+			        if ultragreeds[1]:ToNPC().State < 9001 then
+				    currentbosscount = 1
+			        end
+			    end
+		        end
 			
 			if currentbosscount == 0 and previousbosscount > 0 then
 				if (level:GetStage() == LevelStage.STAGE3_2 or (level:GetStage() == LevelStage.STAGE3_1 and curseoflabyrinth)) and room:GetBossID() == 8 and level:GetStageType() >= StageType.STAGETYPE_REPENTANCE then
