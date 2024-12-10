@@ -1154,6 +1154,7 @@ MusicModCallback:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(self, cmd, pa
 	end
 end)
 
+local NightmarePlaying = false
 MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	if inbadstage then return end
 	
@@ -1226,7 +1227,7 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	end
 	
 	--this is necessary for the music to play after Dream Catcher animations
-	if currentMusicId == Music.MUSIC_JINGLE_NIGHTMARE and Game():GetHUD():IsVisible() then
+    if (currentMusicId == Music.MUSIC_JINGLE_NIGHTMARE or (NightmarePlaying and NightmareScene.IsDogmaNightmare() == false)) and Game():GetHUD():IsVisible() then
 		for i,v in pairs(musicJingles) do
 			v["timeleft"] = 0
 		end
@@ -1384,16 +1385,16 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 					satanfightstage = 0
 				end
 			end
-
-			--check for ultra greed outside of greed mode
-		        if currentbosscount == 0 and room:GetBossID() == 62 and Game().Difficulty == 1 then
-			    local ultragreeds = Isaac.FindByType(406)
-			    if #ultragreeds > 0 then
-			        if ultragreeds[1]:ToNPC().State < 9001 then
-				    currentbosscount = 1
-			        end
-			    end
-		        end
+            
+            --check for ultra greed outside of greed mode
+            if currentbosscount == 0 and room:GetBossID() == 62 and Game().Difficulty == 1 then
+                local ultragreeds = Isaac.FindByType(406)
+                if #ultragreeds > 0 then
+                    if ultragreeds[1]:ToNPC().State < 9001 then
+                        currentbosscount = 1
+                    end
+                end
+            end
 			
 			if currentbosscount == 0 and previousbosscount > 0 then
 				if (level:GetStage() == LevelStage.STAGE3_2 or (level:GetStage() == LevelStage.STAGE3_1 and curseoflabyrinth)) and room:GetBossID() == 8 and level:GetStageType() >= StageType.STAGETYPE_REPENTANCE then
@@ -1437,10 +1438,15 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	
 	--PLAY TWISTED HOME MUSIC AFTER SLEEPING IN MOM'S BED
 	if level:GetStage() == LevelStage.STAGE8 then
-		if modSaveData["darkhome"] == 0 and currentMusicId == Music.MUSIC_JINGLE_NIGHTMARE_ALT then
+        local dogmaNightmare = false
+        --check for dogma nightmare even if the music has been replaced
+        if currentMusicId == Music.MUSIC_JINGLE_NIGHTMARE_ALT or (NightmarePlaying and NightmareScene.IsDogmaNightmare()) then
+            dogmaNightmare = true
+        end
+		if modSaveData["darkhome"] == 0 and dogmaNightmare then
 			modSaveData["darkhome"] = 1
 		end
-		if modSaveData["darkhome"] == 1 and currentMusicId == Music.MUSIC_JINGLE_NIGHTMARE_ALT and Game():GetHUD():IsVisible() then
+		if modSaveData["darkhome"] == 1 and dogmaNightmare and Game():GetHUD():IsVisible() then
 			musicPlay(Music.MUSIC_ISAACS_HOUSE)
 			modSaveData["darkhome"] = 2
 		end
@@ -1559,8 +1565,14 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	challengedonebefore = challengedonenow
 	challengeactivebefore = challengeactivenow
 	roomclearbefore = roomclearnow
+    if NightmarePlaying then NightmarePlaying = false end
 end)
-
+if REPENTOGON then
+    MusicModCallback:AddCallback(ModCallbacks.MC_POST_NIGHTMARE_SCENE_RENDER, function()
+        NightmarePlaying = true
+    end)
+end
+    
 MMC.GetMusicTrack = getMusicTrack
 MMC.GetBossTrack = getBossMusic
 MMC.GetStageTrack = getStageMusic
