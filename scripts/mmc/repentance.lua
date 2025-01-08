@@ -426,6 +426,33 @@ local function getRandomStageMusic(seed)
 	return random_music[(seed % random_music_size)]
 end
 
+local musicByBackdrop = {
+	[BackdropType.BASEMENT] = Music.MUSIC_BASEMENT,
+	[BackdropType.CELLAR] = Music.MUSIC_CELLAR,
+	[BackdropType.BURNT_BASEMENT] = Music.MUSIC_BURNING_BASEMENT,
+	[BackdropType.DOWNPOUR] = Music.MUSIC_DOWNPOUR,
+	[BackdropType.DROSS] = Music.MUSIC_DROSS,
+	[BackdropType.CAVES] = Music.MUSIC_CAVES,
+	[BackdropType.CATACOMBS] = Music.MUSIC_CATACOMBS,
+	[BackdropType.FLOODED_CAVES] = Music.MUSIC_FLOODED_CAVES,
+	[BackdropType.MINES] = Music.MUSIC_MINES,
+	[BackdropType.ASHPIT] = Music.MUSIC_ASHPIT,
+	[BackdropType.DEPTHS] = Music.MUSIC_DEPTHS,
+	[BackdropType.NECROPOLIS] = Music.MUSIC_NECROPOLIS,
+	[BackdropType.DANK_DEPTHS] = Music.MUSIC_DANK_DEPTHS,
+	[BackdropType.MAUSOLEUM] = Music.MUSIC_MAUSOLEUM,
+	[BackdropType.MAUSOLEUM2] = Music.MUSIC_MAUSOLEUM,
+	[BackdropType.MAUSOLEUM3] = Music.MUSIC_MAUSOLEUM,
+	[BackdropType.MAUSOLEUM4] = Music.MUSIC_MAUSOLEUM,
+	[BackdropType.GEHENNA] = Music.MUSIC_GEHENNA,
+	[BackdropType.WOMB] = Music.MUSIC_WOMB_UTERO,
+	[BackdropType.UTERO] = Music.MUSIC_UTERO,
+	[BackdropType.SCARRED_WOMB] = Music.MUSIC_SCARRED_WOMB,
+	[BackdropType.CORPSE] = Music.MUSIC_CORPSE,
+	[BackdropType.CORPSE2] = Music.MUSIC_CORPSE,
+	[BackdropType.CORPSE3] = Music.MUSIC_CORPSE,
+}
+
 --check for death certificate
 MusicModCallback:AddCallback(ModCallbacks.MC_USE_ITEM, function()
 	modSaveData["deathcertificateroom"] = true
@@ -436,6 +463,7 @@ local function getStageMusic()
 	local level = game:GetLevel()
 	local stage = level:GetStage()
 	local stage_type = level:GetStageType()
+	local backdrop = Game():GetRoom():GetBackdropType()
 	
 	--play random music for "DELETE THIS" challenge
 	if Isaac.GetChallenge() == Challenge.CHALLENGE_DELETE_THIS then
@@ -444,10 +472,17 @@ local function getStageMusic()
 		return getRandomStageMusic(stageseed)
 	end
 	
+	--change music when the room backdrop changes in "Red Redemption" challenge
+	if Isaac.GetChallenge() == Challenge.CHALLENGE_RED_REDEMPTION and musicByBackdrop[backdrop] then
+		--NOTE: this is incomplete
+		--TODO: specifically, we need a way to tell which music is supposed to play in special rooms that play the main stage music
+		--such as RoomType.ROOM_CURSE, RoomType.ROOM_DICE, etc.
+		return musicByBackdrop[backdrop]
+	end
+	
 	--death certificate check
 	if modSaveData["deathcertificateroom"] then
-		local backdrop = Game():GetRoom():GetBackdropType()
-		if (backdrop > 48 and backdrop < 55) or backdrop == 60 then
+		if backdrop == BackdropType.DARK_CLOSET then
 			return Music.MUSIC_DARK_CLOSET
 		else
 			modSaveData["deathcertificateroom"] = false
@@ -1543,6 +1578,7 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 			local devildoorspawnednow = (door.TargetRoomType == RoomType.ROOM_DEVIL)
 			local angeldoorspawnednow = (door.TargetRoomType == RoomType.ROOM_ANGEL)
 			
+			--TODO: prevent these sound effects from playing when generating with Red Key?
 			if devildoorspawnednow and not devildoorspawnedbefore then
 				SFXManager():Stop(soundJingles[Music.MUSIC_JINGLE_DEVILROOM_FIND]["id"])
 				musicPlay(Music.MUSIC_JINGLE_DEVILROOM_FIND, Music.MUSIC_NULL)
