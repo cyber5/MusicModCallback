@@ -272,6 +272,7 @@ local previousgreedwave = 0
 local previousbosscount = 0
 local waitingforgamestjingle = true
 local satanfightstage = 0
+local ultragreedfightstage = 0
 local doorprevvariants = {}
 local inbadstage = false
 local strangedoorstatebefore = DoorState.STATE_INIT
@@ -982,6 +983,7 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
 		previousgreedwave = 0
 		previousbosscount = 0
 		satanfightstage = 0
+		ultragreedfightstage = 0
 		
 		challengeactivebefore = room:IsAmbushActive()
 		challengedonebefore = room:IsAmbushDone()
@@ -1158,6 +1160,7 @@ MusicModCallback:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
 	previousgreedwave = 0
 	previousbosscount = 0
 	satanfightstage = 0
+	ultragreedfightstage = 0
 	strangedoorstatebefore = DoorState.STATE_INIT
 	foundknifepiecebefore = false
 	devildoorspawnedbefore = false
@@ -1293,30 +1296,47 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 			local currentbosscount = Isaac.CountBosses()
 			
 			if currentbosscount > 0 and room:GetFrameCount() == 1 then
+				ultragreedfightstage = 0
 				satanfightstage = 0
 				musicCrossfade(getBossMusic())
 			end
 			
 			if room:GetFrameCount() > 1 then
 				if room:GetBossID() == 62 then
-					if satanfightstage == 0 then
+					if ultragreedfightstage == 0 then
 						if currentbosscount == 0 then
-							satanfightstage = 2
+							ultragreedfightstage = 2
 							musicCrossfade(Music.MUSIC_BOSS_OVER)
 							return
 						end
-						satanfightstage = 1
+						ultragreedfightstage = 1
 						musicCrossfade(getBossMusic())
-					elseif satanfightstage == 1 then
+					elseif ultragreedfightstage == 1 then
 						for i,v in ipairs(Isaac.GetRoomEntities()) do
 							if v.Type == EntityType.ENTITY_ULTRA_GREED then
 								if v:ToNPC().State == 9001 then
-									satanfightstage = 2
+									ultragreedfightstage = 2
 									musicCrossfade(Music.MUSIC_BOSS_OVER) --don't play boss over jingle for Ultra Greed
 								end
 								break
 							end
 						end
+					end
+				elseif room:GetBossID() == 55 then --for the "Mega Satan in Greed Mode" mod
+					if satanfightstage == 0 and room:GetFrameCount() > 10 and not room:IsClear() then
+						local playertable = Isaac.FindByType(EntityType.ENTITY_PLAYER,0) --variant 0 is true players, i.e. not co-op babies
+						for i,entity in pairs(playertable) do
+							--TODO: check Soul of the Forgotten?
+							local tempPlayer = entity:ToPlayer()
+							if tempPlayer and tempPlayer.Position.Y < 540 then
+								musicCrossfade(Music.MUSIC_SATAN_BOSS)
+								satanfightstage = 3
+								break
+							end
+						end
+					end
+					if currentbosscount == 0 and previousbosscount > 0 then --this doesn't actually occur for the "Mega Satan in Greed Mode" mod without this mod's help
+						musicCrossfade(getGenericBossDeathJingle(), Music.MUSIC_BOSS_OVER)
 					end
 				else --the room right before Ultra Greed's room
 					if currentbosscount > 0 and previousbosscount == 0 then
