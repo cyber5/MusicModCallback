@@ -1235,6 +1235,13 @@ MusicModCallback:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	if room:GetFrameCount() < 10 and (currentMusicId == Music.MUSIC_JINGLE_GAME_START or currentMusicId == Music.MUSIC_JINGLE_GAME_START_ALT) then
 		waitingforgamestjingle = true
 	end
+    
+	--dont mess with epiphany menu music
+	if Epiphany and (Epiphany.character_menu_visible or currentMusicId == Epiphany.MENU_MUSIC) then
+		waitingforgamestjingle = false
+		musicJingles[Music.MUSIC_JINGLE_GAME_START]["timeleft"] = 0
+		musicJingles[Music.MUSIC_JINGLE_GAME_START_ALT]["timeleft"] = 0
+	end
 	
 	--upon reset, play new music immediately
 	if waitingforgamestjingle and (currentMusicId ~= Music.MUSIC_JINGLE_GAME_START and currentMusicId ~= Music.MUSIC_JINGLE_GAME_START_ALT) then
