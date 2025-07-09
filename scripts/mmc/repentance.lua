@@ -483,7 +483,7 @@ local function getStageMusic()
 	
 	--death certificate check
 	if modSaveData["deathcertificateroom"] then
-		if backdrop == BackdropType.DARK_CLOSET then
+		if backdrop == BackdropType.DARK_CLOSET or backdrop == BackdropType.CLOSET_B then
 			return Music.MUSIC_DARK_CLOSET
 		else
 			modSaveData["deathcertificateroom"] = false
