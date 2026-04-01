@@ -846,10 +846,10 @@ function musicPlay(track, track2)
 		end
 		
 		if musicmgr:GetCurrentMusicID() ~= id then
-			musicmgr:Play(correctedTrackNum(id),1)
-			if not soundJingleVolume then
-				musicmgr:UpdateVolume()
-			end
+            musicmgr:Play(correctedTrackNum(id),Options.MusicVolume)
+            if not soundJingleVolume then
+                musicmgr:UpdateVolume()
+            end
 		end
 	elseif id == 0 then
 		return
@@ -862,10 +862,10 @@ function musicPlay(track, track2)
 				return
 			end
 			if replacedtrack2 then
-				musicmgr:Play(correctedTrackNum(id2),1)
-				if not soundJingleVolume then
-					musicmgr:UpdateVolume()
-				end
+                musicmgr:Play(correctedTrackNum(id2),Options.MusicVolume)
+                if not soundJingleVolume then
+                    musicmgr:UpdateVolume()
+                end
 			else
 				musicPlay(id2)
 			end
